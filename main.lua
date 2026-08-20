@@ -1,6 +1,5 @@
 function Weapon()
     local weapon = {}
-    setmetatable(weapon, { __index = Weapon })
     --
 
     weapon.type = "sword"
@@ -8,31 +7,32 @@ function Weapon()
     weapon.damage = 10
     weapon.isactive = false
 
-     function weapon:attack()
+    function weapon:attack()
         print("Attacking with " .. weapon.type .. " for " .. weapon.damage .. " damage!")
     end
 
-    function weapon:update(dt)
+    function weapon:update(dt, px, py)
         -- moving sword with player
-        weapon.x = player.x + 50
-        weapon.y = player.y - 10
+        weapon.x = px + 50
+        weapon.y = py - 10
 
         -- moving sword while active
         if weapon.isactive then
-            weapon.x = love.mouse.getX()
-            weapon.y = love.mouse.getY()
+            local sin = love.mouse.getX() - px 
+            local cos = love.mouse.getY() - py 
+            local angle = math.atan2(cos, sin)
+            weapon.x = math.cos(angle) * weapon.length + px
+            weapon.y = math.sin(angle) * weapon.length + py
         end
-
     end
 
-     function weapon:draw()
+    function weapon:draw()
         love.graphics.setColor(1, 0, 0)
         love.graphics.rectangle("fill", self.x, self.y, self.length, 20) -- 
         love.graphics.setColor(1, 1, 1)
     end
     return weapon
 end
-
 
 function love.load()
     local wpn = Weapon()
@@ -49,6 +49,8 @@ function love.load()
 end
 
 function love.update(dt)
+    love.mouse.setVisible(false)
+
     -- movement
     if love.keyboard.isDown("up", "w") then
         player.y = player.y - player.speed * dt
@@ -58,10 +60,10 @@ function love.update(dt)
 
     if love.keyboard.isDown("left", "a") then
         player.x = player.x - player.speed * dt
-    
+
     elseif love.keyboard.isDown("right", "d") then
         player.x = player.x + player.speed * dt
-    end 
+    end
 
     if love.mouse.isDown(1) then
         player.weapon.wpn.isactive = true
@@ -70,10 +72,21 @@ function love.update(dt)
         player.weapon.wpn.isactive = false
     end
 
+    player.weapon.wpn:update(dt, player.x, player.y) 
 
+
+
+    if love.keyboard.isDown('escape') then
+        love.event.quit()
+    end
 end
 
 function love.draw()
+    --draw mouse
+    love.graphics.setColor(0, 1, 0)
+    love.graphics.circle("fill", love.mouse.getX(), love.mouse.getY(), 2)
+    love.graphics.setColor(1, 1, 1)
+
     love.graphics.circle("fill", player.x, player.y, 50)
 
     player.weapon.wpn:draw()
