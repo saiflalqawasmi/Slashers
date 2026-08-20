@@ -28,7 +28,8 @@ function Weapon()
 
     function weapon:draw()
         love.graphics.setColor(1, 0, 0)
-        love.graphics.rectangle("fill", self.x, self.y, self.length, 20) -- 
+        love.graphics.rectangle("fill", self.x, self.y, self.length, 20)
+        love.graphics.line('fill', self.x)
         love.graphics.setColor(1, 1, 1)
     end
     return weapon
